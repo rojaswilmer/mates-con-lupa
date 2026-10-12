@@ -1,5 +1,5 @@
 'use strict';
-const KIDS=[{id:'matias',name:'Matías',curso:3,av:'🦖'},{id:'isabella',name:'Isabella',curso:2,av:'🦄'}];
+const KIDS=[{id:'matias',name:'Matías',curso:3,av:'🦖',subs:['mates','science','english','frances']},{id:'isabella',name:'Isabella',curso:2,av:'🦄',subs:['mates','lectura','catala','frances']}];
 const TOPICS={
  suma:{t:'Sumas',i:'➕',d:'con y sin llevadas'},
  resta:{t:'Restas',i:'➖',d:'con y sin llevadas'},
@@ -16,7 +16,7 @@ const R=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
 const pick=a=>a[R(0,a.length-1)];
 let kid=null,st=null,cur=null,input='',hintStep=0,wrong=0,view=()=>home();
 const D3=()=>window.T3D;
-const owlBox=()=>D3()?'':'<div class="owl" id="owl">🦉</div>';
+const owlBox=()=>D3()?'':`<div class="owl" id="owl">${window.petEmoji?petEmoji():'🦉'}</div>`;
 function stage(sel,h,name,opts){if(!D3())return;D3().mount($(sel),h);D3().scene(name,opts||{})}
 window.__t3dReady=()=>{window.__wrap3D&&window.__wrap3D(window.T3D);document.body.classList.add('d3');view()};
 const sfx=(n,...a)=>window.SFX&&SFX.play(n,...a);
@@ -30,16 +30,16 @@ function header(){ $('#hdr').innerHTML=kid?`<span class="stars">⭐ ${st.stars}<
  if(kid)$('#hk').onclick=home; $('#hp').onclick=parents;}
 
 function home(){kid=null;view=home;header();
- app.innerHTML=`<div id="slot"></div><div class="tutor">${owlBox()}<div class="bubble">¡Hola! Soy Lupa, tu búho de las mates. ¿Quién va a jugar hoy?</div></div><div class="grid">`+
+ app.innerHTML=`<div id="slot"></div><div class="tutor">${owlBox()}<div class="bubble">¡Hola! Soy Lupa, tu búho profe. ¿Quién va a jugar hoy?</div></div><div class="grid">`+
  KIDS.map(k=>`<button class="card kid" data-k="${k.id}"><div class="av">${k.av}</div>${k.name}<br><small>${k.curso}º de primaria</small></button>`).join('')+`</div>`;
- app.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{kid=KIDS.find(k=>k.id===b.dataset.k);st=load(kid.id)||fresh(kid);for(const t in TOPICS)if(!st.topics[t])st.topics[t]=fresh(kid).topics[t];save();menu()});
- stage('#slot',230,'owl');}
+ app.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{kid=KIDS.find(k=>k.id===b.dataset.k);st=load(kid.id)||fresh(kid);for(const t in TOPICS)if(!st.topics[t])st.topics[t]=fresh(kid).topics[t];save();kidHome()});
+ window.T3D&&T3D.pet({sp:'buho'});stage('#slot',230,'owl');}
 
 function menu(){view=menu;header();
- app.innerHTML=`<div id="slot"></div><div class="tutor">${owlBox()}<div class="bubble">¡Hola, ${kid.name}! Tienes ${st.stars} estrellas. ¿Qué practicamos?</div></div><div class="grid">`+
+ app.innerHTML=`<div class="row" style="justify-content:flex-start"><button class="back" id="bkm">⬅ Materias</button><span>🔢 Mates</span></div><div id="slot"></div><div class="tutor">${owlBox()}<div class="bubble">¡Hola, ${kid.name}! Tienes ${st.stars} estrellas. ¿Qué practicamos?</div></div><div class="grid">`+
  Object.entries(TOPICS).map(([k,v])=>`<div class="tcell"><button class="topic" data-t="${k}">${v.i} ${v.t}<small>${v.d} · nivel ${st.topics[k].lvl}</small>${(st.lessons||{})[k]?'':'<small class="new">🎓 ¡Lección nueva!</small>'}</button><button class="lesbtn" data-l="${k}">🎓 Ver lección</button></div>`).join('')+`</div>`;
  app.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>(st.lessons||{})[b.dataset.t]?start(b.dataset.t):lesson(b.dataset.t));
- app.querySelectorAll('[data-l]').forEach(b=>b.onclick=()=>lesson(b.dataset.l));
+ app.querySelectorAll('[data-l]').forEach(b=>b.onclick=()=>lesson(b.dataset.l));$('#bkm').onclick=kidHome;
  stage('#slot',200,'owl');}
 
 // ---------- generadores ----------
@@ -62,14 +62,25 @@ function gen(topic,l){
   else{a=R(300,999);b=R(101,a-1);}
   q.a=a;q.b=b;q.ans=a-b;q.text=`${a} − ${b} = ?`;q.manip=a<=20?'line':'blocks';
  }else if(topic==='posicion'){
-  const n=l<=2?R(11,99):R(101,999);const c=Math.floor(n/100),d=Math.floor(n/10)%10,u=n%10;
-  const kind=l===1?'build':pick(['build','dec','cen','uni']);
-  q.n=n;q.c=c;q.d=d;q.u=u;
-  if(kind==='build'){q.text=`Construye el número ${n} con bloques`;q.ans=n;q.manip='blocks';q.build=true}
+  const n=l<=1?R(11,99):l===2?R(11,999):R(101,999);const c=Math.floor(n/100),d=Math.floor(n/10)%10,u=n%10;
+  const K=[['build','dec','uni'],['build','dec','cen','uni','decomp','comp'],['build','decomp','comp','exch','cen'],['comp','exch','cmp','words','decomp'],['exch','cmp','words','decomp','comp','build']][l-1];
+  let kind=pick(K);if(kind==='cen'&&n<100)kind='dec';
+  q.n=n;q.c=c;q.d=d;q.u=u;q.manip='blocks';const desc=`${c?c+' centenas, ':''}${d} decenas y ${u} unidades`;
+  if(kind==='build'){q.text=`Construye el número ${n} con bloques`;q.ans=n;q.build=true}
   else if(kind==='dec'){q.text=`¿Cuántas decenas tiene ${n}?`;q.ans=d}
-  else if(kind==='cen'&&n>99){q.text=`¿Cuántas centenas tiene ${n}?`;q.ans=c}
-  else{q.text=`¿Cuántas unidades tiene ${n}?`;q.ans=u}
-  if(!q.build)q.manip='blocks';
+  else if(kind==='cen'){q.text=`¿Cuántas centenas tiene ${n}?`;q.ans=c}
+  else if(kind==='uni'){q.text=`¿Cuántas unidades tiene ${n}?`;q.ans=u}
+  else if(kind==='decomp'){const which=pick(n>99?['c','d','u']:['d','u']);const parts={c:`${which==='c'?'?':c} C`,d:`${which==='d'?'?':d} D`,u:`${which==='u'?'?':u} U`};
+   q.text=`${n} = ${n>99?parts.c+' + ':''}${parts.d} + ${parts.u}`;q.ans={c,d,u}[which];q.hk=[`C = centenas, D = decenas, U = unidades.`,`${n} = ${desc}.`]}
+  else if(kind==='comp'){q.text=`${c?c+' C + ':''}${d} D + ${u} U = ?`;q.ans=n;q.hk=[`Cada C vale 100, cada D vale 10 y cada U vale 1.`,`${c*100} + ${d*10} + ${u} = ${n}`]}
+  else if(kind==='exch'){const t=pick(['u2d','d2c','d2u','c2d']);const k=R(2,9);
+   if(t==='d2u'){q.text=`${k} decenas = ? unidades`;q.ans=k*10;q.hk=['1 decena = 10 unidades.',`${k} × 10 = ${k*10}`]}
+   else if(t==='c2d'){q.text=`${k} centenas = ? decenas`;q.ans=k*10;q.hk=['1 centena = 10 decenas.',`${k} × 10 = ${k*10}`]}
+   else if(t==='u2d'){q.text=`${k*10} unidades = ? decenas`;q.ans=k;q.hk=['10 unidades se cambian por 1 decena.',`${k*10} : 10 = ${k}`]}
+   else{q.text=`${k*10} decenas = ? centenas`;q.ans=k;q.hk=['10 decenas se cambian por 1 centena.',`${k*10} : 10 = ${k}`]}}
+  else if(kind==='cmp'){let m;do{const sw=pick(['du','cd','u']);m=sw==='du'&&d!==u?c*100+u*10+d:sw==='cd'&&c!==d&&d?d*100+c*10+u:n+pick([-1,1])*R(1,9)}while(m===n||m<100||m>999);
+   q.text=`¿Cuál es MAYOR?\n${n}  o  ${m}`;q.ans=Math.max(n,m);q.hk=['Compara primero las centenas. Si son iguales, mira las decenas, y luego las unidades.',`${Math.max(n,m)} es mayor que ${Math.min(n,m)}.`]}
+  else{q.text=`Escribe con cifras:\n«${numES(n)}»`;q.ans=n;q.hk=['Busca primero las centenas (cien, doscientos…), luego decenas y unidades.',`${numES(n)} = ${desc}.`]}
  }else if(topic==='tablas'){
   const sets=[[2,5,10],[2,3,4,5,10],[2,3,4,5,6,10],[6,7,8,9],[2,3,4,5,6,7,8,9]];
   const a=pick(sets[l-1]),b=R(1,10);q.a=a;q.b=b;q.ans=a*b;q.text=`${a} × ${b} = ?`;q.manip='line';
@@ -108,7 +119,7 @@ function hints(q){
    else s.push(`Unidades: ${ua} − ${ub} = ${ua-ub}.`);
    s.push(`Ahora las decenas${ua<ub?' (recuerda que has gastado 1)':''}.`);
    s.push(q.manip==='line'?`En la recta, ponte en el ${q.a} y salta ${q.b} hacia la izquierda.`:`Truco: comprueba sumando. Tu respuesta + ${q.b} debe dar ${q.a}.`);return s},
-  posicion:()=>[`Cada barra azul es una decena (10) y cada cuadrado naranja una centena (100). Los cubitos verdes son unidades.`,
+  posicion:()=>q.hk?q.hk.concat([`Puedes usar los bloques para ayudarte.`]):[`Cada barra azul es una decena (10) y cada cuadrado naranja una centena (100). Los cubitos verdes son unidades.`,
    `${q.n} = ${q.c?q.c+' centenas, ':''}${q.d} decenas y ${q.u} unidades.`,q.build?`Arrastra ${q.c?q.c+' centenas, ':''}${q.d} decenas y ${q.u} unidades a la alfombra.`:`Mira la cifra que está en esa posición.`],
   tablas:()=>[`${q.a} × ${q.b} quiere decir ${q.b} grupos de ${q.a}.`,`Puedes ir saltando de ${q.a} en ${q.a} en la recta: ${Array.from({length:Math.min(q.b,4)},(_,i)=>q.a*(i+1)).join(', ')}…`,
    q.b>1?`Si ya sabes ${q.a} × ${q.b-1} = ${q.a*(q.b-1)}, solo te falta sumar ${q.a} más.`:`Cualquier número por 1 es él mismo.`],
@@ -177,11 +188,14 @@ function dragify(src,drop){src.addEventListener('pointerdown',e=>{const g=src.fi
  const oc=src.onclick;src.onclick=e=>{if(src.dataset.skip)return;oc&&oc(e)};}
 
 // ---------- evaluación y adaptación ----------
+function numES(n){const U=['','uno','dos','tres','cuatro','cinco','seis','siete','ocho','nueve','diez','once','doce','trece','catorce','quince','dieciséis','diecisiete','dieciocho','diecinueve','veinte','veintiuno','veintidós','veintitrés','veinticuatro','veinticinco','veintiséis','veintisiete','veintiocho','veintinueve'];
+ const D=['','','','treinta','cuarenta','cincuenta','sesenta','setenta','ochenta','noventa'],C=['','ciento','doscientos','trescientos','cuatrocientos','quinientos','seiscientos','setecientos','ochocientos','novecientos'];
+ if(n===100)return'cien';const c=Math.floor(n/100),r=n%100;const t=r<30?U[r]:D[Math.floor(r/10)]+(r%10?' y '+U[r%10]:'');return[C[c],t].filter(Boolean).join(' ')}
 function check(){const q=cur,tp=st.topics[q.topic];let val;
  if(q.shade)val=shaded.size;else if(q.build)val=blocks.c*100+blocks.d*10+blocks.u;else{if(input==='')return say('Escribe tu respuesta con los números 🙂');val=+input}
  if(val===q.ans){tp.ok++;tp.miss=0;tp.streak++;const earn=wrong?1:(hintStep?2:3);st.stars+=earn;let up='';
   if(tp.streak>=3&&tp.lvl<MAXLVL){tp.lvl++;tp.streak=0;up=` 🚀 ¡Subes al nivel ${tp.lvl}!`}
-  log(q,true);save();cur=gen(q.topic,tp.lvl);input='';hintStep=0;wrong=0;
+  log(q,true);petReward(earn);save();cur=gen(q.topic,tp.lvl);input='';hintStep=0;wrong=0;
   render(`${pick(PRAISE)} +${'⭐'.repeat(earn)}${up}`);if(D3())D3().celebrate(earn);else{$('#owl').classList.add('good');sfx('correct');setTimeout(()=>sfx('sparkle',earn),500)}
   if(up)setTimeout(()=>sfx('levelup'),1100);
  }else{tp.ko++;wrong++;tp.streak=0;tp.miss++;log(q,false);
@@ -199,7 +213,7 @@ function parents(){view=parents;header();
   return`<div class="card" style="text-align:left;margin-bottom:16px"><h3>${k.av} ${k.name} · ${k.curso}º · ⭐ ${s.stars} · ${hoy} ejercicios hoy</h3><table><tr><th>Tema</th><th>Nivel</th><th>Aciertos</th><th>Fallos</th><th>% acierto</th></tr>`+
   Object.entries(TOPICS).map(([t,v])=>{const p=s.topics[t]||{lvl:1,ok:0,ko:0},tot=p.ok+p.ko,pc=tot?Math.round(p.ok*100/tot):0;
    return`<tr><td>${v.i} ${v.t}</td><td>${p.lvl}/${MAXLVL}</td><td>${p.ok}</td><td>${p.ko}</td><td><div class="bar"><i style="width:${pc}%"></i></div>${tot?pc+'%':'—'}</td></tr>`}).join('')+
-  `</table><details><summary>Últimos fallos</summary><ul>${s.log.filter(l=>!l.ok).slice(-10).reverse().map(l=>`<li>${TOPICS[l.topic].t}: ${l.q}</li>`).join('')||'<li>Ninguno 🎉</li>'}</ul></details>
+  (window.parentsExtra?parentsExtra(k,s):'')+`</table><details><summary>Últimos fallos</summary><ul>${s.log.filter(l=>!l.ok).slice(-10).reverse().map(l=>`<li>${(TOPICS[l.topic]||{t:l.topic}).t}: ${l.q}</li>`).join('')||'<li>Ninguno 🎉</li>'}</ul></details>
   <button class="back" data-reset="${k.id}" style="margin-top:10px">Borrar progreso de ${k.name}</button></div>`}).join('');
  $('#bk').onclick=()=>kid?menu():home();
  app.querySelectorAll('[data-reset]').forEach(b=>b.onclick=()=>{if(confirm('¿Seguro que quieres borrar el progreso?')){localStorage.removeItem('tm_'+b.dataset.reset);if(kid&&kid.id===b.dataset.reset){st=fresh(kid);save()}parents()}});
@@ -249,11 +263,16 @@ const LESSONS={
   ['…3, 4. ¡Cuatro saltos!',async T=>{await T.line.hop(12);await T.line.hop(11)}],
   ['La rana ha llegado al 11. Así que 15 − 4 = 11. ¡Ahora tú!',T=>T.celebrate(3)]]},
  posicion:{title:'Unidades, decenas y centenas',scene:['blocks'],steps:[
-  ['Este cubito pequeño es una UNIDAD. Vale 1.',async T=>{await T.blocks.add('u')}],
-  ['Si pongo 10 unidades en fila forman una barra: una DECENA. Vale 10.',async T=>{for(let i=0;i<9;i++)await T.blocks.add('u');await T.blocks.merge('u')}],
-  ['Y 10 decenas juntas forman una placa: una CENTENA. ¡Vale 100!',async T=>{await T.blocks.add('c')}],
-  ['Con 2 centenas, 3 decenas y 4 unidades construimos el número 234. ¡Mira el número arriba!',async T=>{await T.blocks.add('c');T.blocks.remove('d');await T.wait(300);for(let i=0;i<3;i++)await T.blocks.add('d');for(let i=0;i<3;i++)await T.blocks.add('u')}],
-  ['¡Muy bien! Las centenas, decenas y unidades son como casillas del número. ¡A practicar!',T=>T.celebrate(3)]]},
+  ['Este cubito pequeño es una UNIDAD (U). Vale 1.',async T=>{await T.blocks.add('u')}],
+  ['Si junto 10 unidades forman una barra: una DECENA (D). ¡10 U = 1 D!',async T=>{for(let i=0;i<9;i++)await T.blocks.add('u');await T.blocks.merge('u')}],
+  ['Y 10 decenas forman una placa: una CENTENA (C). ¡10 D = 1 C! Vale 100.',async T=>{T.blocks.clear();await T.wait(200);await T.blocks.add('c')}],
+  ['Vamos a construir el 347: 3 centenas, 4 decenas y 7 unidades.',async T=>{await T.blocks.add('c');await T.blocks.add('c');for(let i=0;i<4;i++)await T.blocks.add('d');for(let i=0;i<7;i++)await T.blocks.add('u')}],
+  ['Lo podemos DESCOMPONER: 347 = 3 C + 4 D + 7 U = 300 + 40 + 7.',T=>T.owl('talk')],
+  ['Si añado 3 unidades más… ¡tengo 10 unidades! Las CAMBIO por 1 decena: ahora hay 350.',async T=>{for(let i=0;i<3;i++)await T.blocks.add('u');await T.blocks.merge('u')}],
+  ['Y si añado 5 decenas… ¡10 decenas! Las CAMBIO por 1 centena: ¡400!',async T=>{for(let i=0;i<5;i++)await T.blocks.add('d');await T.blocks.merge('d')}],
+  ['Para COMPARAR 347 y 374: mira las centenas (3 y 3, iguales), luego las decenas: 4 es menor que 7. ¡374 es mayor!',T=>T.owl('hint')],
+  ['Los números también se escriben con letras: 347 es «trescientos cuarenta y siete».',T=>T.owl('talk')],
+  ['¡Ya eres experto en C, D y U! Vamos a practicar.',T=>T.celebrate(3)]]},
  tablas:{title:'Multiplicar son saltos iguales',scene:['line',{max:30,step:3,start:0}],steps:[
   ['Multiplicar es sumar el mismo número muchas veces. Vamos a ver 3 × 4.',T=>T.owl('talk')],
   ['3 × 4 son 4 saltos de 3 en 3. Primer salto: ¡3!',async T=>{await T.line.hop(3)}],
@@ -282,7 +301,7 @@ function lesson(t){view=()=>lesson(t);header();const L=LESSONS[t];let i=0,busy=f
  const begin=()=>{i=0;if(D3()){D3().mount($('#slot3'),330);D3().scene(L.scene[0],L.scene[1]||{})}step()};
  const step=async()=>{const [txt,act]=L.steps[i];sfx('whoosh');say(txt);$('#dots').innerHTML=L.steps.map((_,j)=>`<i class="${j<=i?'on':''}"></i>`).join('');
   $('#nx').textContent=i===L.steps.length-1?'¡Ahora yo! ✏️':'Siguiente ▶';
-  if(D3()){busy=true;$('#nx').disabled=true;try{await D3().wait(i===0?700:50);await act(D3())}catch(e){console.error(e)}busy=false;$('#nx').disabled=false}};
+  if(D3()){busy=true;$('#nx').disabled=true;try{await D3().wait(i===0?700:50);await act(D3())}catch(e){console.error(e)}busy=false;const nx=$('#nx');if(nx)nx.disabled=false}};
  $('#nx').onclick=()=>{if(busy)return;if(i<L.steps.length-1){i++;step()}else{st.lessons=st.lessons||{};st.lessons[t]=1;save();start(t)}};
  $('#rep').onclick=()=>{if(!busy)begin()};begin();
 }

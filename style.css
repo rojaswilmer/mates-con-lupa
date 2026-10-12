@@ -128,3 +128,36 @@ button:active{transform:translateY(6px) scale(.95,.9);box-shadow:0 1px 0 #c97a00
 @keyframes cf{to{transform:translate(var(--x),var(--y)) rotate(var(--r));opacity:0}}
 .row>span{font-size:22px;font-weight:700;background:#fff9;border-radius:999px;padding:6px 16px}
 @media (prefers-reduced-motion:reduce){#bgfx{display:none}}
+/* ===== materias + mascota ===== */
+.sgrid{grid-template-columns:repeat(auto-fit,minmax(180px,1fr))}
+.subj{display:flex;flex-direction:column;align-items:center;gap:6px;background:linear-gradient(180deg,#fff,color-mix(in srgb,var(--sc) 25%,#fff))!important;box-shadow:0 8px 0 var(--sc),0 12px 22px #0002!important}
+.subj .si{font-size:64px;animation:bob 2.4s ease-in-out infinite}
+.sh{color:#fff;text-shadow:0 3px 0 #0003;margin:18px 4px 8px;font-size:30px}
+.pethero{display:grid;grid-template-columns:1.3fr 1fr;gap:16px;align-items:center}
+@media(max-width:760px){.pethero{grid-template-columns:1fr}}
+.petside{background:#fff;border-radius:30px;padding:16px;box-shadow:0 8px 0 #0001}.petside h2{margin:0 0 8px;font-size:38px}
+.pet2d{font-size:180px;text-align:center;animation:bob 2s ease-in-out infinite}
+.lv{font-size:30px;font-weight:700;color:#ff8a00}
+.pbar{position:relative;height:30px;background:#eee6ff;border-radius:999px;overflow:hidden;margin:7px 0}.pbar i{display:block;height:100%;border-radius:999px;transition:width .6s}
+.pbar span{position:absolute;inset:0;font-size:17px;line-height:30px;padding-left:12px;font-weight:700}
+.xp i{background:linear-gradient(90deg,#ffd84d,#ff8a00)}.mood i{background:linear-gradient(90deg,#ff8fc8,#ff3d8f)}.en i{background:linear-gradient(90deg,#5cd0ff,#3d6bff)}.goal i{background:linear-gradient(90deg,#6ef59a,#20c45a)}
+.cta{font-size:28px;font-weight:700;color:#20a04a;text-align:center;margin:10px 0;animation:bob 2s infinite}
+.petc.sel{outline:6px solid #ff3d8f;transform:scale(1.04)}.petc{font-size:26px}.petc .av{font-size:90px}
+.pname{font:inherit;font-size:32px;border-radius:24px;border:5px solid #b9a4ff;padding:10px 18px;width:300px;text-align:center}
+.accrow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:8px 0}.acc{font-size:17px;min-height:46px;padding:8px 14px;background:linear-gradient(180deg,#cfe0ff,#8fb4ff)}.acc.on{background:linear-gradient(180deg,#5ff28b,#18c45a)}
+#toast{position:fixed;left:50%;top:90px;transform:translateX(-50%);background:#fff;border:5px solid #ffd34d;border-radius:28px;padding:14px 24px;font-size:26px;font-weight:700;z-index:60;box-shadow:0 10px 30px #0003;animation:popIn .5s}
+.sq{font-size:clamp(30px,5.5vw,52px);font-weight:700;text-align:center;background:#ffffffd9;border-radius:30px;padding:14px;margin:12px 0;box-shadow:0 8px 0 #0001}
+.bigpic{font-size:clamp(110px,22vw,190px);text-align:center;line-height:1.1;animation:popIn .6s cubic-bezier(.3,1.8,.5,1)}
+.story{background:#fffbe8;border-radius:30px;padding:16px 22px;box-shadow:0 8px 0 #0001;font-size:28px;line-height:1.5}.story h3{margin:4px 0}.spic{font-size:64px;text-align:center}
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin:10px 0}.opt{font-size:30px;min-height:90px}
+.opts.emo .opt,.emo{font-size:70px}
+.o0{background:linear-gradient(180deg,#ff7aa8,#ff3d7f);box-shadow:0 7px 0 #b81e55}.o1{background:linear-gradient(180deg,#5cd0ff,#00a8ff);box-shadow:0 7px 0 #0074b3}
+.o2{background:linear-gradient(180deg,#6ef59a,#20c45a);box-shadow:0 7px 0 #138a3d}.o3{background:linear-gradient(180deg,#a98bff,#7a4dff);box-shadow:0 7px 0 #4f2bc2}.o4{background:linear-gradient(180deg,#ffb35c,#ff8a00);box-shadow:0 7px 0 #b86200}
+.opt.bad{filter:grayscale(1);opacity:.5}.shake{animation:wiggle .5s}
+.match{display:grid;grid-template-columns:1fr 1fr;gap:20px}.match>div{display:flex;flex-direction:column;gap:12px}.mo{min-height:90px;font-size:30px}.mo.emo{font-size:56px}
+.mo.sel{outline:6px solid #ff3d8f}.mo.done{background:linear-gradient(180deg,#5ff28b,#18c45a);opacity:.7}
+.lcard .lpic{font-size:clamp(60px,12vw,110px);text-align:center;background:#fff;border-radius:30px;padding:14px;margin:10px 0}
+.bonebtns .bb{font-size:17px;min-height:46px;padding:8px 14px}
+.bline{min-height:100px;border:5px dashed #b9a4ff;border-radius:28px;background:#fff;display:flex;flex-wrap:wrap;gap:10px;padding:10px;align-items:center;justify-content:center;margin:10px 0}
+.bline:empty:before{content:"👆 Tap the words in order";color:#b9a4ff;font-size:22px}
+.chips{display:flex;flex-wrap:wrap;gap:12px;justify-content:center}.chip{min-height:72px;font-size:30px}
