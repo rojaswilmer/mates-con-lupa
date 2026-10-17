@@ -1,0 +1,16 @@
+{
+ "name": "Aprende con Lupa",
+ "short_name": "Lupa",
+ "description": "Mates, lectura, idiomas y ciencias para Isabella y Matías, con mascota virtual.",
+ "lang": "es",
+ "start_url": "./",
+ "scope": "./",
+ "display": "standalone",
+ "orientation": "any",
+ "background_color": "#b9a4ff",
+ "theme_color": "#ff7a6b",
+ "icons": [
+  {"src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+  {"src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"}
+ ]
+}

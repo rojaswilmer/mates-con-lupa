@@ -161,3 +161,111 @@ button:active{transform:translateY(6px) scale(.95,.9);box-shadow:0 1px 0 #c97a00
 .bline{min-height:100px;border:5px dashed #b9a4ff;border-radius:28px;background:#fff;display:flex;flex-wrap:wrap;gap:10px;padding:10px;align-items:center;justify-content:center;margin:10px 0}
 .bline:empty:before{content:"👆 Tap the words in order";color:#b9a4ff;font-size:22px}
 .chips{display:flex;flex-wrap:wrap;gap:12px;justify-content:center}.chip{min-height:72px;font-size:30px}
+/* ===== versión móvil (360–430 px vertical, móviles en horizontal) ===== */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;touch-action:manipulation}
+body{min-height:100vh;min-height:100dvh}
+button,.src,.chip,.mo,.opt{touch-action:manipulation;-webkit-user-select:none;user-select:none}
+.src{touch-action:none}
+.src.drag{outline:4px solid #ff3d8f}
+.droptarget{outline:6px dashed #ff3d8f;outline-offset:-6px}
+.drag-ghost{position:fixed;pointer-events:none;opacity:.85;z-index:70;transform:translate(-50%,-110%) scale(1.4)}
+header{padding-top:calc(12px + env(safe-area-inset-top));padding-left:calc(22px + env(safe-area-inset-left));padding-right:calc(22px + env(safe-area-inset-right))}
+main{padding-left:calc(16px + env(safe-area-inset-left));padding-right:calc(16px + env(safe-area-inset-right));padding-bottom:calc(84px + env(safe-area-inset-bottom))}
+#sndbar{right:calc(12px + env(safe-area-inset-right));bottom:calc(12px + env(safe-area-inset-bottom));z-index:55}
+#sndbar button{min-height:52px;min-width:52px}
+#toast{top:calc(90px + env(safe-area-inset-top));max-width:calc(100vw - 24px)}
+#stage{max-width:100%}
+.tablewrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+
+@media (max-width:600px){
+ body{font-size:19px;background-attachment:scroll}
+ header{padding:calc(8px + env(safe-area-inset-top)) calc(12px + env(safe-area-inset-right)) 8px calc(12px + env(safe-area-inset-left));border-radius:0 0 22px 22px;gap:8px}
+ header h1{font-size:21px;line-height:1.1;flex:1;min-width:0;letter-spacing:0}
+ #hdr{display:flex;gap:6px;align-items:center;flex-shrink:0}
+ #hdr .stars{font-size:20px;padding:4px 10px}
+ #hdr button{min-height:48px;min-width:48px;padding:6px 10px;font-size:20px;border-radius:18px}
+ #hdr .lbl{display:none}
+ main{padding-top:10px;padding-left:calc(10px + env(safe-area-inset-left));padding-right:calc(10px + env(safe-area-inset-right))}
+ button{min-height:52px;padding:10px 16px;font-size:20px;border-radius:20px;box-shadow:0 5px 0 #c97a00,0 8px 14px #0003}
+ .ok{box-shadow:0 5px 0 #0e8c3e,0 8px 14px #0003}.hint{box-shadow:0 5px 0 #b8195c,0 8px 14px #0003}.back{box-shadow:0 5px 0 #2a41b8,0 8px 14px #0003}
+ .row{gap:8px;margin:8px 0}
+ .row>button{flex:1 1 auto}
+ .row[style*="flex-start"]>button,.row[style*="space-between"]>button{flex:0 0 auto}
+ .row>span{font-size:15px;padding:5px 10px;min-width:0;overflow-wrap:anywhere}
+ .grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+ .card{padding:12px;border-radius:24px}
+ .kid{font-size:24px;padding:16px 8px}.kid .av{font-size:64px}
+ .kid small{font-size:15px}
+ .petgrid{grid-template-columns:repeat(3,minmax(0,1fr))}
+ .petc{font-size:17px;padding:10px 4px}.petc .av{font-size:48px}
+ .pname{width:100%;max-width:260px;font-size:24px;padding:8px 12px}
+ .topic{font-size:20px;min-height:96px;padding:10px 8px;overflow-wrap:anywhere}
+ .topic small{font-size:14px}
+ .lesbtn{font-size:16px;min-height:48px;padding:8px 10px}
+ .subj .si{font-size:46px}
+ .sh{font-size:23px;margin:14px 4px 6px}
+ .tutor{gap:8px;margin:8px 0}.owl{font-size:44px}
+ .bubble{font-size:18px;padding:10px 14px;min-height:0;border-width:3px;border-radius:22px}
+ .q{font-size:clamp(40px,12vw,58px);margin:10px 0;padding:10px 8px;border-radius:26px}
+ .q.long{font-size:clamp(20px,6vw,28px)}
+ .dg{-webkit-text-stroke:1.5px #fff}
+ #ansv{min-width:180px;min-height:76px;font-size:60px;line-height:68px;border-width:5px;border-radius:24px}
+ .pad{grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin:8px auto}
+ .pad button{font-size:34px;min-height:60px;padding:0;border-radius:20px;min-width:0}
+ .manip{padding:8px;border-radius:22px}
+ .tray{gap:6px;flex-wrap:wrap;align-items:stretch}
+ .src{padding:6px;font-size:13px;min-width:64px;min-height:64px;justify-content:flex-end;gap:4px}
+ .b100{width:44px;height:44px}.b10{width:10px;height:44px}.b1{width:12px;height:12px}
+ #clr{min-height:48px!important;align-self:center}
+ .count{font-size:17px}.count .big{font-size:36px}
+ .sq{font-size:clamp(22px,6.5vw,30px);padding:10px;border-radius:24px}
+ .bigpic{font-size:clamp(84px,26vw,120px)}
+ .story{font-size:20px;padding:12px 14px}.spic{font-size:48px}
+ .opts{grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}.opt{font-size:22px;min-height:60px}
+ .opts.emo .opt,.emo{font-size:46px}
+ .match{gap:10px}.mo{min-height:60px;font-size:19px;padding:8px 6px;overflow-wrap:anywhere}.mo.emo{font-size:40px}
+ .chip{min-height:56px;font-size:21px}.chips{gap:8px}
+ .bline{min-height:72px;padding:8px}
+ .lcard .lpic{font-size:clamp(56px,18vw,90px)}
+ .pethero{gap:10px}.petside{padding:12px}.petside h2{font-size:26px}.pet2d{font-size:120px}
+ .lv{font-size:22px}.cta{font-size:20px}
+ .acc,.bonebtns .bb{min-height:48px;font-size:16px}
+ #toast{font-size:19px;padding:10px 16px;top:calc(70px + env(safe-area-inset-top))}
+ table{font-size:14px}td,th{padding:5px}
+ h2{font-size:26px}
+}
+@media (max-width:370px){header h1{font-size:18px}.pad button{font-size:30px}}
+
+/* móvil en horizontal */
+@media (max-height:500px) and (orientation:landscape){
+ #sndbar{flex-direction:column}
+ main{padding-right:calc(74px + env(safe-area-inset-right));padding-bottom:calc(16px + env(safe-area-inset-bottom))}
+ body{font-size:18px;background-attachment:scroll}
+ header{padding:calc(4px + env(safe-area-inset-top)) calc(16px + env(safe-area-inset-right)) 4px calc(16px + env(safe-area-inset-left));border-radius:0 0 18px 18px}
+ header h1{font-size:22px}
+ #hdr .stars{font-size:20px;padding:2px 12px}
+ #hdr button{min-height:48px;font-size:17px;padding:6px 12px}
+ main{padding-top:8px;max-width:none}
+ button{min-height:48px;padding:8px 16px;font-size:19px;border-radius:18px}
+ .row{margin:6px 0;gap:8px}.row>span{font-size:15px}
+ .grid{grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}
+ .petgrid{grid-template-columns:repeat(6,minmax(0,1fr))}
+ .kid{font-size:22px;padding:10px}.kid .av{font-size:52px}
+ .petc .av{font-size:44px}.petc{font-size:16px;padding:8px 4px}
+ .topic{font-size:20px;min-height:84px;padding:8px}.topic small{font-size:14px}
+ .subj .si{font-size:40px}.sh{font-size:22px;margin:10px 4px 4px}
+ .tutor{margin:6px 0}.bubble{font-size:17px;padding:8px 12px;min-height:0}
+ .q{font-size:44px;margin:6px 0;padding:6px}.q.long{font-size:24px}
+ #ansv{min-height:64px;font-size:50px;line-height:56px;min-width:160px}
+ .pad{grid-template-columns:repeat(10,minmax(0,1fr));max-width:none;gap:6px;margin:6px 0}
+ .pad button{font-size:30px;min-height:56px;padding:0;min-width:0}
+ .sq{font-size:24px;padding:8px;margin:6px 0}.bigpic{font-size:80px}
+ .opts{grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}.opt{font-size:21px;min-height:56px}
+ .opts.emo .opt,.emo{font-size:40px}
+ .mo{min-height:52px;font-size:19px}.chip{min-height:52px;font-size:20px}
+ .petside h2{font-size:26px}.pet2d{font-size:100px}
+ .src{padding:6px;font-size:13px}.b100{width:44px;height:44px}.b10{width:10px;height:44px}.b1{width:12px;height:12px}
+ #clr{min-height:48px!important}
+ .lcard .lpic{font-size:70px}
+ .acc,.bonebtns .bb{min-height:48px}
+}

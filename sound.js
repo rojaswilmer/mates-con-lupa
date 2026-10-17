@@ -11,11 +11,17 @@ function init(){if(ctx)return ctx;const AC=window.AudioContext||window.webkitAud
  const comp=ctx.createDynamicsCompressor();comp.threshold.value=-18;comp.ratio.value=4;master.connect(comp);comp.connect(ctx.destination);
  sfxBus=ctx.createGain();sfxBus.gain.value=0.55;sfxBus.connect(master);
  musBus=ctx.createGain();musBus.gain.value=0.07;musBus.connect(master);return ctx}
-function unlock(){const c=init();if(!c)return;if(c.state==='suspended')c.resume();
- // buffer silencioso para iOS
- try{const b=c.createBuffer(1,1,22050),s=c.createBufferSource();s.buffer=b;s.connect(c.destination);s.start(0)}catch(e){}
+let primed=false;
+function unlock(){const c=init();if(!c)return;
+ // iOS/Safari: el contexto nace 'suspended' y puede quedar 'interrupted'; se reanuda dentro del gesto
+ if(c.state!=='running'){const p=c.resume();p&&p.catch&&p.catch(()=>{})}
+ // buffer silencioso (desbloqueo clásico de iOS), solo una vez
+ if(!primed){primed=true;try{const b=c.createBuffer(1,1,22050),s=c.createBufferSource();s.buffer=b;s.connect(c.destination);s.start(0)}catch(e){}}
  if(music&&!musTimer)startMusic()}
-['pointerdown','touchend','keydown','click'].forEach(ev=>document.addEventListener(ev,unlock,{capture:true,passive:true}));
+['touchstart','touchend','pointerdown','pointerup','keydown','click'].forEach(ev=>document.addEventListener(ev,unlock,{capture:true,passive:true}));
+// al volver a la app (cambio de pestaña, bloqueo de pantalla) se reanuda con el siguiente toque o al momento si se puede
+document.addEventListener('visibilitychange',()=>{if(!ctx)return;if(document.hidden){if(ctx.state==='running')ctx.suspend().catch(()=>{})}else ctx.resume().catch(()=>{})});
+window.addEventListener('pageshow',()=>{ctx&&ctx.state!=='running'&&ctx.resume().catch(()=>{})});
 function ok(){return ctx&&!muted&&ctx.state==='running'}
 // tono básico con envolvente
 function tone(f,t0,dur,{type='sine',vol=.5,f2=null,att=.005,bus=null}={}){const t=ctx.currentTime+t0;const o=ctx.createOscillator(),g=ctx.createGain();
@@ -73,5 +79,5 @@ window.__wrap3D=T=>{if(!T||T.__snd)return;T.__snd=1;
  w(T.blocks,'add','drop');w(T.blocks,'merge','merge');w(T.blocks,'remove','pop');w(T.line,'hop','hop');w(T.frac,'toggle','slice');w(T.share,'deal','clink');
  const cel=T.celebrate;T.celebrate=function(n){play('correct');setTimeout(()=>play('sparkle',n||3),500);return cel.apply(this,arguments)};
  const ow=T.owl;T.owl=function(a){if(a==='hint')play('hint');else if(a==='sad')play('wrong');return ow.apply(this,arguments)}};
-window.SFX={play,setMute,setMusic,get muted(){return muted},get music(){return music}};
+window.SFX={play,setMute,setMusic,get muted(){return muted},get music(){return music},get state(){return ctx?ctx.state:'none'}};
 })();

@@ -26,7 +26,7 @@ function load(id){try{return JSON.parse(localStorage.getItem('tm_'+id))||null}ca
 function fresh(k){const s={stars:0,topics:{},log:[]};for(const t in TOPICS)s.topics[t]={lvl:k.curso===3?2:1,streak:0,miss:0,ok:0,ko:0};return s}
 function save(){localStorage.setItem('tm_'+kid.id,JSON.stringify(st))}
 
-function header(){ $('#hdr').innerHTML=kid?`<span class="stars">⭐ ${st.stars}</span> <button id="hk">${kid.av} Cambiar</button> <button id="hp">👪 Padres</button>`:`<button id="hp">👪 Padres</button>`;
+function header(){ $('#hdr').innerHTML=kid?`<span class="stars">⭐ ${st.stars}</span> <button id="hk" aria-label="Cambiar">${kid.av}<span class="lbl"> Cambiar</span></button> <button id="hp" aria-label="Padres">👪<span class="lbl"> Padres</span></button>`:`<button id="hp" aria-label="Padres">👪<span class="lbl"> Padres</span></button>`;
  if(kid)$('#hk').onclick=home; $('#hp').onclick=parents;}
 
 function home(){kid=null;view=home;header();
@@ -180,11 +180,19 @@ function drawManip(q){const m=$('#manip');if(D3())return drawManip3D(q,m);
    $('#pile').onclick=()=>{if(!left)return;sfx('clink');const i=shared.indexOf(Math.min(...shared));shared[i]++;left--;draw()}};draw();
  }else m.style.display='none';
 }
-function dragify(src,drop){src.addEventListener('pointerdown',e=>{const g=src.firstElementChild.cloneNode();g.style.cssText=`position:fixed;pointer-events:none;opacity:.8;left:${e.clientX}px;top:${e.clientY}px;z-index:9`;document.body.appendChild(g);let moved=false;
- const mv=ev=>{moved=true;g.style.left=ev.clientX-10+'px';g.style.top=ev.clientY-10+'px'};
- const up=ev=>{document.removeEventListener('pointermove',mv);document.removeEventListener('pointerup',up);g.remove();const mat=$('#mat')||$('#stage');if(moved&&mat){const r=mat.getBoundingClientRect();if(ev.clientX>r.left&&ev.clientX<r.right&&ev.clientY>r.top&&ev.clientY<r.bottom)drop()}
-  if(moved){src.dataset.skip=1;setTimeout(()=>delete src.dataset.skip,50)}};
- document.addEventListener('pointermove',mv);document.addEventListener('pointerup',up)});
+function dragify(src,drop){// arrastre con dedo o ratón (pointer events + captura)
+ src.addEventListener('pointerdown',e=>{if(e.button>0)return;const sx=e.clientX,sy=e.clientY;let g=null,moved=false;
+  const tgt=()=>$('#mat')||$('#stage');try{src.setPointerCapture(e.pointerId)}catch(_){}
+  const inside=ev=>{const m=tgt();if(!m)return false;const r=m.getBoundingClientRect();return ev.clientX>r.left&&ev.clientX<r.right&&ev.clientY>r.top&&ev.clientY<r.bottom};
+  const mv=ev=>{if(!moved&&Math.hypot(ev.clientX-sx,ev.clientY-sy)<8)return;
+   if(!moved){moved=true;g=src.firstElementChild.cloneNode();g.classList.add('drag-ghost');document.body.appendChild(g);src.classList.add('drag')}
+   g.style.left=ev.clientX+'px';g.style.top=ev.clientY+'px';const m=tgt();if(m)m.classList.toggle('droptarget',inside(ev));
+   if(ev.clientY>innerHeight-40)scrollBy(0,14);else if(ev.clientY<40)scrollBy(0,-14);ev.preventDefault()};
+  const end=(ev,ok)=>{src.removeEventListener('pointermove',mv);src.removeEventListener('pointerup',up);src.removeEventListener('pointercancel',cancel);
+   if(g)g.remove();src.classList.remove('drag');const m=tgt();if(m)m.classList.remove('droptarget');
+   if(moved){if(ok&&inside(ev))drop();src.dataset.skip=1;setTimeout(()=>delete src.dataset.skip,350)}};
+  const up=ev=>end(ev,true),cancel=ev=>end(ev,false);
+  src.addEventListener('pointermove',mv);src.addEventListener('pointerup',up);src.addEventListener('pointercancel',cancel)});
  const oc=src.onclick;src.onclick=e=>{if(src.dataset.skip)return;oc&&oc(e)};}
 
 // ---------- evaluación y adaptación ----------
@@ -210,10 +218,10 @@ function log(q,ok){st.log.push({t:Date.now(),topic:q.topic,lvl:q.lvl,q:q.text.sp
 function parents(){view=parents;header();
  app.innerHTML=`<div class="row" style="justify-content:flex-start"><button class="back" id="bk">⬅ Volver</button></div><h2>👪 Progreso</h2>`+KIDS.map(k=>{const s=load(k.id);if(!s)return`<div class="card"><h3>${k.av} ${k.name}</h3>Todavía no ha jugado.</div>`;
   const today=new Date().toDateString(),hoy=s.log.filter(l=>new Date(l.t).toDateString()===today).length;
-  return`<div class="card" style="text-align:left;margin-bottom:16px"><h3>${k.av} ${k.name} · ${k.curso}º · ⭐ ${s.stars} · ${hoy} ejercicios hoy</h3><table><tr><th>Tema</th><th>Nivel</th><th>Aciertos</th><th>Fallos</th><th>% acierto</th></tr>`+
+  return`<div class="card" style="text-align:left;margin-bottom:16px"><h3>${k.av} ${k.name} · ${k.curso}º · ⭐ ${s.stars} · ${hoy} ejercicios hoy</h3><div class="tablewrap"><table><tr><th>Tema</th><th>Nivel</th><th>Aciertos</th><th>Fallos</th><th>% acierto</th></tr>`+
   Object.entries(TOPICS).map(([t,v])=>{const p=s.topics[t]||{lvl:1,ok:0,ko:0},tot=p.ok+p.ko,pc=tot?Math.round(p.ok*100/tot):0;
    return`<tr><td>${v.i} ${v.t}</td><td>${p.lvl}/${MAXLVL}</td><td>${p.ok}</td><td>${p.ko}</td><td><div class="bar"><i style="width:${pc}%"></i></div>${tot?pc+'%':'—'}</td></tr>`}).join('')+
-  (window.parentsExtra?parentsExtra(k,s):'')+`</table><details><summary>Últimos fallos</summary><ul>${s.log.filter(l=>!l.ok).slice(-10).reverse().map(l=>`<li>${(TOPICS[l.topic]||{t:l.topic}).t}: ${l.q}</li>`).join('')||'<li>Ninguno 🎉</li>'}</ul></details>
+  (window.parentsExtra?parentsExtra(k,s):'')+`</table></div><details><summary>Últimos fallos</summary><ul>${s.log.filter(l=>!l.ok).slice(-10).reverse().map(l=>`<li>${(TOPICS[l.topic]||{t:l.topic}).t}: ${l.q}</li>`).join('')||'<li>Ninguno 🎉</li>'}</ul></details>
   <button class="back" data-reset="${k.id}" style="margin-top:10px">Borrar progreso de ${k.name}</button></div>`}).join('');
  $('#bk').onclick=()=>kid?menu():home();
  app.querySelectorAll('[data-reset]').forEach(b=>b.onclick=()=>{if(confirm('¿Seguro que quieres borrar el progreso?')){localStorage.removeItem('tm_'+b.dataset.reset);if(kid&&kid.id===b.dataset.reset){st=fresh(kid);save()}parents()}});
@@ -293,7 +301,9 @@ const LESSONS={
   ['Después pensamos qué pasa: le REGALAN, así que tiene más. Juntar es SUMAR.',async T=>{for(let i=0;i<3;i++)await T.blocks.add('u')}],
   ['Contamos: 5 + 3 = 8. ¡Lucía tiene 8 cromos! Lee siempre despacio y piensa: ¿junto, quito, reparto o hago grupos?',T=>T.celebrate(3)]]}
 };
-function lesson(t){view=()=>lesson(t);header();const L=LESSONS[t];let i=0,busy=false;
+// las animaciones de una lección se detienen si el niño sale de ella (no ensucian la escena siguiente)
+function guardT(T,alive){const w=o=>new Proxy(o,{get(t,k){const v=t[k];if(typeof v==='function')return(...a)=>alive()?v.apply(t,a):Promise.resolve();return v&&typeof v==='object'?w(v):v}});return w(T)}
+function lesson(t){view=()=>lesson(t);const me=view;header();const L=LESSONS[t];let i=0,busy=false;const GT=()=>D3()&&guardT(D3(),()=>view===me);
  app.innerHTML=`<div class="row" style="justify-content:space-between"><button class="back" id="bk">⬅ Temas</button><span>🎓 Lección: ${L.title}</span></div>
  <div class="tutor">${owlBox()}<div class="bubble" id="say"></div></div><div id="slot3"></div><div class="dots" id="dots"></div>
  <div class="row"><button class="back" id="rep">🔁 Otra vez</button><button class="ok" id="nx">Siguiente ▶</button></div>`;
@@ -301,7 +311,7 @@ function lesson(t){view=()=>lesson(t);header();const L=LESSONS[t];let i=0,busy=f
  const begin=()=>{i=0;if(D3()){D3().mount($('#slot3'),330);D3().scene(L.scene[0],L.scene[1]||{})}step()};
  const step=async()=>{const [txt,act]=L.steps[i];sfx('whoosh');say(txt);$('#dots').innerHTML=L.steps.map((_,j)=>`<i class="${j<=i?'on':''}"></i>`).join('');
   $('#nx').textContent=i===L.steps.length-1?'¡Ahora yo! ✏️':'Siguiente ▶';
-  if(D3()){busy=true;$('#nx').disabled=true;try{await D3().wait(i===0?700:50);await act(D3())}catch(e){console.error(e)}busy=false;const nx=$('#nx');if(nx)nx.disabled=false}};
+  if(D3()){busy=true;$('#nx').disabled=true;try{await D3().wait(i===0?700:50);await act(GT())}catch(e){console.error(e)}busy=false;const nx=$('#nx');if(nx)nx.disabled=false}};
  $('#nx').onclick=()=>{if(busy)return;if(i<L.steps.length-1){i++;step()}else{st.lessons=st.lessons||{};st.lessons[t]=1;save();start(t)}};
  $('#rep').onclick=()=>{if(!busy)begin()};begin();
 }

@@ -8,16 +8,20 @@ else init();
 function init(){
 const P={bg:0xeaf6ff,floor:0xfdf3e7,owl:0xb79ced,belly:0xf6e7ff,beak:0xffa64d,unit:0x7bd34d,rod:0x3dc3ff,flat:0xff8a3d,pink:0xff6fa8,yellow:0xffd34d,blue:0x4a7cff,green:0x5bd17a};
 const wrap=document.createElement('div');wrap.id='stage';
-const renderer=new THREE.WebGLRenderer({antialias:true,alpha:false,powerPreference:'low-power'});
-renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.5));
-renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+// Móvil = pantalla táctil pequeña (las tablets y el escritorio quedan como antes)
+const MOBILE=(()=>{try{return matchMedia('(pointer:coarse)').matches&&Math.min(screen.width,screen.height)<768}catch(e){return false}})();
+const DPR_CAP=MOBILE?2:1.5;
+const renderer=new THREE.WebGLRenderer({antialias:!MOBILE,alpha:false,powerPreference:MOBILE?'default':'low-power'});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,DPR_CAP));
+renderer.shadowMap.enabled=true;renderer.shadowMap.type=MOBILE?THREE.PCFShadowMap:THREE.PCFSoftShadowMap;
+renderer.domElement.addEventListener('webglcontextlost',e=>e.preventDefault());
 wrap.appendChild(renderer.domElement);
 const scene=new THREE.Scene();scene.background=new THREE.Color(P.bg);scene.fog=new THREE.Fog(P.bg,18,34);
 const cam=new THREE.PerspectiveCamera(38,2,0.1,100);cam.position.set(0,4,16);
 const camGoal={pos:new THREE.Vector3(0,4,16),look:new THREE.Vector3(0,1.5,0)},camLook=new THREE.Vector3(0,1.5,0);
 scene.add(new THREE.HemisphereLight(0xffffff,0xffe4c4,1.1));
 const sun=new THREE.DirectionalLight(0xffffff,1.6);sun.position.set(5,12,8);sun.castShadow=true;
-sun.shadow.mapSize.set(1024,1024);Object.assign(sun.shadow.camera,{left:-14,right:14,top:10,bottom:-6,near:1,far:40});sun.shadow.radius=4;scene.add(sun);
+sun.shadow.mapSize.set(MOBILE?512:1024,MOBILE?512:1024);Object.assign(sun.shadow.camera,{left:-14,right:14,top:10,bottom:-6,near:1,far:40});sun.shadow.radius=4;scene.add(sun);
 const floor=new THREE.Mesh(new THREE.CircleGeometry(30,40),new THREE.MeshLambertMaterial({color:P.floor}));floor.rotation.x=-Math.PI/2;floor.receiveShadow=true;scene.add(floor);
 const M=c=>new THREE.MeshLambertMaterial({color:c});
 const mesh=(g,c,cast=true)=>{const m=new THREE.Mesh(g,typeof c==='number'?M(c):c);m.castShadow=cast;m.receiveShadow=true;return m};
@@ -246,8 +250,16 @@ function frame(now){requestAnimationFrame(frame);const dt=Math.min(.05,(now-last
   else c.p.y=-50;dummy.position.copy(c.p);dummy.rotation.set(c.r.x,c.r.y,c.r.x*.5);dummy.updateMatrix();conf.setMatrixAt(i,dummy.matrix)}
  conf.instanceMatrix.needsUpdate=true;
  resize();renderer.render(scene,cam)}
-function resize(){const w=wrap.clientWidth,h=wrap.clientHeight;if(!w||!h)return;const c=renderer.domElement;if(c._w!==w||c._h!==h){c._w=w;c._h=h;renderer.setSize(w,h,false);cam.aspect=w/h;
- cam.fov=w/h<1.4?52:38;cam.updateProjectionMatrix()}}
+// Alto del escenario según pantalla: en móvil vertical ~45% del alto, en horizontal ~58%
+function stageH(h){const W=innerWidth,H=innerHeight;if(!MOBILE&&W>600&&H>500)return h;
+ const land=W>H;const cap=land?Math.max(170,Math.round(H*.58)):Math.max(190,Math.round(Math.min(H*.45,W*.78)));return Math.min(h,cap)}
+function fitStage(){const h=+wrap.dataset.h||340;const nh=stageH(h)+'px';if(wrap.style.height!==nh)wrap.style.height=nh}
+addEventListener('resize',fitStage);addEventListener('orientationchange',()=>setTimeout(fitStage,250));
+function resize(){const w=wrap.clientWidth,h=wrap.clientHeight;if(!w||!h)return;const c=renderer.domElement;
+ const dpr=Math.min(window.devicePixelRatio||1,DPR_CAP);if(renderer.getPixelRatio()!==dpr)renderer.setPixelRatio(dpr),c._w=0;
+ if(c._w!==w||c._h!==h){c._w=w;c._h=h;renderer.setSize(w,h,false);const a=w/h;cam.aspect=a;
+  // pantallas estrechas: abrir el campo de visión para que quepa el ancho de la escena
+  cam.fov=a>=1.4?38:Math.min(75,Math.max(52,2*Math.atan(Math.tan(19*Math.PI/180)*2.25/a)*180/Math.PI));cam.updateProjectionMatrix()}}
 requestAnimationFrame(frame);
 
 // ---- toques ----
@@ -257,7 +269,8 @@ renderer.domElement.addEventListener('pointerdown',e=>{const r=renderer.domEleme
  else{const o=ray.intersectObject(owl,true)[0];if(o){owlDo('celebrate');window.SFX&&SFX.play('hoot')}}});
 
 window.T3D={
- mount(el,h){el.appendChild(wrap);wrap.style.height=(h||340)+'px'},
+ mount(el,h){el.appendChild(wrap);wrap.dataset.h=h||340;fitStage()},
+ mobile:MOBILE,
  scene(name,opts={}){clearAll();if(name==='blocks')blocksSetup();else if(name==='line')lineSetup(opts);else if(name==='frac')fracSetup(opts.den);else if(name==='share')shareSetup(opts.total,opts.n);else if(name==='skeleton')skeletonSetup();else if(name==='room')roomSetup();setView(views[name]?name:'owl')},
  owl:owlDo,
  pet:o=>buildPet(o||{sp:'buho'}),
